@@ -27,9 +27,19 @@ public class ApolloClientSystemConsts {
   public static final String APP_ID = "app.id";
 
   /**
+   * apollo client app label
+   */
+  public static final String APOLLO_LABEL = "apollo.label";
+
+  /**
    * apollo client app id environment variables
    */
   public static final String APP_ID_ENVIRONMENT_VARIABLES = "APP_ID";
+
+  /**
+   * apollo client app label environment variables
+   */
+  public static final String APOLLO_LABEL_ENVIRONMENT_VARIABLES = "APOLLO_LABEL";
 
   /**
    * cluster name
@@ -126,4 +136,14 @@ public class ApolloClientSystemConsts {
    * enable property order environment variables
    */
   public static final String APOLLO_PROPERTY_ORDER_ENABLE_ENVIRONMENT_VARIABLES = "APOLLO_PROPERTY_ORDER_ENABLE";
+
+  /**
+   * enable property names cache
+   */
+  public static final String APOLLO_PROPERTY_NAMES_CACHE_ENABLE = "apollo.property.names.cache.enable";
+
+  /**
+   * enable property names cache environment variables
+   */
+  public static final String APOLLO_PROPERTY_NAMES_CACHE_ENABLE_ENVIRONMENT_VARIABLES = "APOLLO_PROPERTY_NAMES_CACHE_ENABLE";
 }
