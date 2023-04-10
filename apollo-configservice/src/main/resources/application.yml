@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Apollo Authors
+# Copyright 2023 Apollo Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@ spring:
   cloud:
     consul:
       enabled: false
-ctrip:
-  appid: 100003171
+    zookeeper:
+      enabled: false
+  jpa:
+    properties:
+      hibernate:
+        metadata_builder_contributor: com.ctrip.framework.apollo.common.jpa.SqlFunctionsMetadataBuilderContributor
 
 server:
   port: 8080
 
 logging:
   file:
-    name: /opt/logs/100003171/apollo-configservice.log
+    name: /opt/logs/apollo-configservice.log
 
 eureka:
   instance:
