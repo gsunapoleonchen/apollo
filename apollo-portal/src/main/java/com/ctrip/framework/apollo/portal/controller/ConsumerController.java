@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Apollo Authors
+ * Copyright 2025 Apollo Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ import java.util.*;
 @RestController
 public class ConsumerController {
 
-  private static final Date DEFAULT_EXPIRES = new GregorianCalendar(2099, Calendar.JANUARY, 1).getTime();
+  private static final Date DEFAULT_EXPIRES =
+      new GregorianCalendar(2099, Calendar.JANUARY, 1).getTime();
 
   private final ConsumerService consumerService;
 
@@ -61,13 +62,11 @@ public class ConsumerController {
   }
 
   @Transactional
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @PostMapping(value = "/consumers")
-  public ConsumerInfo create(
-      @RequestBody ConsumerCreateRequestVO requestVO,
+  public ConsumerInfo create(@RequestBody ConsumerCreateRequestVO requestVO,
       @RequestParam(value = "expires", required = false)
-      @DateTimeFormat(pattern = "yyyyMMddHHmmss") Date expires
-  ) {
+      @DateTimeFormat(pattern = "yyyyMMddHHmmss") Date expires) {
     if (StringUtils.isBlank(requestVO.getAppId())) {
       throw BadRequestException.appIdIsBlank();
     }
@@ -81,37 +80,44 @@ public class ConsumerController {
       throw BadRequestException.orgIdIsBlank();
     }
 
+    if (requestVO.isRateLimitEnabled()) {
+      if (requestVO.getRateLimit() <= 0) {
+        throw BadRequestException.rateLimitIsInvalid();
+      }
+    } else {
+      requestVO.setRateLimit(0);
+    }
+
     Consumer createdConsumer = consumerService.createConsumer(convertToConsumer(requestVO));
 
     if (Objects.isNull(expires)) {
       expires = DEFAULT_EXPIRES;
     }
 
-    ConsumerToken consumerToken = consumerService.generateAndSaveConsumerToken(createdConsumer, expires);
+    ConsumerToken consumerToken = consumerService.generateAndSaveConsumerToken(createdConsumer,
+        requestVO.getRateLimit(), expires);
     if (requestVO.isAllowCreateApplication()) {
       consumerService.assignCreateApplicationRoleToConsumer(consumerToken.getToken());
     }
     return consumerService.getConsumerInfoByAppId(requestVO.getAppId());
   }
 
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @GetMapping(value = "/consumer-tokens/by-appId")
   public ConsumerToken getConsumerTokenByAppId(@RequestParam String appId) {
     return consumerService.getConsumerTokenByAppId(appId);
   }
 
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @GetMapping(value = "/consumer/info/by-appId")
   public ConsumerInfo getConsumerInfoByAppId(@RequestParam String appId) {
     return consumerService.getConsumerInfoByAppId(appId);
   }
 
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @PostMapping(value = "/consumers/{token}/assign-role")
-  public List<ConsumerRole> assignNamespaceRoleToConsumer(
-      @PathVariable String token,
-      @RequestParam String type,
-      @RequestParam(required = false) String envs,
+  public List<ConsumerRole> assignNamespaceRoleToConsumer(@PathVariable String token,
+      @RequestParam String type, @RequestParam(required = false) String envs,
       @RequestBody NamespaceDTO namespace) {
     List<ConsumerRole> consumerRoleList = new ArrayList<>(8);
 
@@ -127,7 +133,7 @@ public class ConsumerController {
     if (StringUtils.isEmpty(namespaceName)) {
       throw new BadRequestException("Params(NamespaceName) can not be empty.");
     }
-    if (null != envs){
+    if (null != envs) {
       String[] envArray = envs.split(",");
       List<String> envList = Lists.newArrayList();
       // validate env parameter
@@ -143,25 +149,25 @@ public class ConsumerController {
 
       List<ConsumerRole> consumeRoles = new ArrayList<>();
       for (String env : envList) {
-        consumeRoles.addAll(consumerService.assignNamespaceRoleToConsumer(token, appId, namespaceName, env));
+        consumeRoles.addAll(
+            consumerService.assignNamespaceRoleToConsumer(token, appId, namespaceName, env));
       }
       return consumeRoles;
     }
 
-    consumerRoleList.addAll(
-        consumerService.assignNamespaceRoleToConsumer(token, appId, namespaceName)
-    );
+    consumerRoleList
+        .addAll(consumerService.assignNamespaceRoleToConsumer(token, appId, namespaceName));
     return consumerRoleList;
   }
 
   @GetMapping("/consumers")
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
-  public List<ConsumerInfo> getConsumerList(Pageable page){
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
+  public List<ConsumerInfo> getConsumerList(Pageable page) {
     return consumerService.findConsumerInfoList(page);
   }
 
   @DeleteMapping(value = "/consumers/by-appId")
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   public void deleteConsumers(@RequestParam String appId) {
     consumerService.deleteConsumer(appId);
   }

@@ -13,6 +13,7 @@
   - [部署架构](zh/deployment/deployment-architecture.md)
   - 第三方工具部署
     - [基于Rainbond一键安装高可用Apollo集群](zh/deployment/third-party-tool-rainbond.md)
+    - [基于宝塔面板快速部署 Apollo](zh/deployment/third-party-tool-btpanel.md)
 
 - 管理端指南
   - [Apollo使用指南](zh/portal/apollo-user-guide.md)
@@ -29,7 +30,9 @@
   - [NodeJS 客户端使用指南](zh/client/nodejs-sdks-user-guide.md)
   - [PHP 客户端使用指南](zh/client/php-sdks-user-guide.md)
   - [C 客户端使用指南](zh/client/c-sdks-user-guide.md)
+  - [C++ 客户端使用指南](zh/client/cpp-sdks-user-guide.md)
   - [Rust 客户端使用指南](zh/client/rust-sdks-user-guide.md)
+  - [K8S ConfigMap接入指南](zh/client/k8s-configmap-user-guide.md)
   - [HTTP API 接入指南](zh/client/other-language-client-user-guide.md)
 
 - 扩展开发

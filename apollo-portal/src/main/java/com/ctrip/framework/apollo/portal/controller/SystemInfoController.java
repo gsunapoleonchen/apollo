@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Apollo Authors
+ * Copyright 2025 Apollo Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import com.ctrip.framework.apollo.portal.entity.vo.SystemInfo;
 import com.ctrip.framework.apollo.portal.environment.Env;
 import com.ctrip.framework.apollo.portal.environment.PortalMetaDomainService;
 import java.util.List;
-import javax.annotation.PostConstruct;
+import java.util.Objects;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
@@ -49,11 +50,9 @@ public class SystemInfoController {
   private final RestTemplateFactory restTemplateFactory;
   private final PortalMetaDomainService portalMetaDomainService;
 
-  public SystemInfoController(
-      final PortalSettings portalSettings,
+  public SystemInfoController(final PortalSettings portalSettings,
       final RestTemplateFactory restTemplateFactory,
-      final PortalMetaDomainService portalMetaDomainService
-  ) {
+      final PortalMetaDomainService portalMetaDomainService) {
     this.portalSettings = portalSettings;
     this.restTemplateFactory = restTemplateFactory;
     this.portalMetaDomainService = portalMetaDomainService;
@@ -64,7 +63,7 @@ public class SystemInfoController {
     restTemplate = restTemplateFactory.getObject();
   }
 
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @GetMapping
   public SystemInfo getSystemInfo() {
     SystemInfo systemInfo = new SystemInfo();
@@ -85,7 +84,7 @@ public class SystemInfoController {
     return systemInfo;
   }
 
-  @PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+  @PreAuthorize(value = "@unifiedPermissionValidator.isSuperAdmin()")
   @GetMapping(value = "/health")
   public Health checkHealth(@RequestParam String instanceId) {
     List<Env> allEnvs = portalSettings.getAllEnvs();
@@ -128,11 +127,14 @@ public class SystemInfoController {
 
     String selectedMetaServerAddress = portalMetaDomainService.getDomain(env);
     try {
-      environmentInfo.setConfigServices(getServerAddress(selectedMetaServerAddress, CONFIG_SERVICE_URL_PATH));
+      environmentInfo
+          .setConfigServices(getServerAddress(selectedMetaServerAddress, CONFIG_SERVICE_URL_PATH));
 
-      environmentInfo.setAdminServices(getServerAddress(selectedMetaServerAddress, ADMIN_SERVICE_URL_PATH));
+      environmentInfo
+          .setAdminServices(getServerAddress(selectedMetaServerAddress, ADMIN_SERVICE_URL_PATH));
     } catch (Throwable ex) {
-      String errorMessage = "Loading config/admin services from meta server: " + selectedMetaServerAddress + " failed!";
+      String errorMessage = "Loading config/admin services from meta server: "
+          + selectedMetaServerAddress + " failed!";
       logger.error(errorMessage, ex);
       environmentInfo.setErrorMessage(errorMessage + " Exception: " + ex.getMessage());
     }
@@ -145,6 +147,6 @@ public class SystemInfoController {
   }
 
   private boolean isValidVersion(String version) {
-    return !version.equals("java-null");
+    return !Objects.equals(version, "java-null");
   }
 }
